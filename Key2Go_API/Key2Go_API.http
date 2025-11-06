@@ -1,0 +1,6 @@
+@Key2Go_API_HostAddress = http://localhost:5168
+
+GET {{Key2Go_API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
