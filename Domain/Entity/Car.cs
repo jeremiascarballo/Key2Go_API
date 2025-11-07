@@ -6,7 +6,8 @@
         public string Brand { get; set; }
         public string Model { get; set; }
         public int YearOfManufacture { get; set; }
-        public string Km { get; set; }
+        //KM deberia ser int para calculos
+        public int Km { get; set; }
         public int DailyPrice { get; set; }
         public CarStatus Status { get; set; }
     }
