@@ -9,6 +9,7 @@
         public string Password { get; set; }
         public string PhoneNumber { get; set; }
 
+        //FK
         public int RoleId { get; set; } = 1;
         public Role Role { get; set; }
     }
