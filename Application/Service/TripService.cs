@@ -67,6 +67,8 @@ namespace Application.Service
             {
                 ReservationNumber = request.ReservationNumber,
                 CreationDate = DateTime.UtcNow,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
                 Status = (TripStatus)request.Status,
                 UserId = request.UserId,
                 CarId = request.CarId
@@ -168,7 +170,6 @@ namespace Application.Service
             var car = await _carRepository.GetByIdAsync(trip.CarId);
             trip.InitialKm = car.Km;
 
-            trip.StartDate = DateTime.UtcNow;
             trip.Status = TripStatus.Active;
 
             car.Status = CarStatus.InUse;
@@ -188,7 +189,6 @@ namespace Application.Service
 
             trip.FinalKm = finalKm;
             trip.Status = TripStatus.Finished;
-            trip.EndDate = DateTime.UtcNow;
 
             var car = await _carRepository.GetByIdAsync(trip.CarId);
             car.Status = CarStatus.Available;

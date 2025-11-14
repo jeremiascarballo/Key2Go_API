@@ -3,6 +3,8 @@
     public class TripRequest
     {
         public int ReservationNumber { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public int Status { get; set; }
 
         // FK
