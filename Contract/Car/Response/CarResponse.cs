@@ -9,7 +9,9 @@ namespace Contract.Car.Response
         public string Model { get; set; }
         public int YearOfManufacture { get; set; }
         public int Km { get; set; }
-        public int DailyPrice { get; set; }
+        public decimal DailyPriceUsd { get; set; }
+        public decimal DailyPriceArs { get; set; }
+
         public int Status { get; set; }
     }
 }

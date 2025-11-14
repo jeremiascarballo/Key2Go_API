@@ -1,4 +1,4 @@
-﻿namespace Contract.Auth.Request
+﻿namespace Contract.External.Auth.Request
 {
     public class LoginRequest
     {

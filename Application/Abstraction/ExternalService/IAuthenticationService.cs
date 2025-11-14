@@ -1,4 +1,4 @@
-﻿using Contract.Auth.Request;
+﻿using Contract.External.Auth.Request;
 
 namespace Application.Abstraction.ExternalService
 {

@@ -1,4 +1,4 @@
-﻿namespace Contract.Auth.Response
+﻿namespace Contract.External.Auth.Response
 {
     public class LoginResponse
     {

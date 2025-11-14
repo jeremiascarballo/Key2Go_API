@@ -1,6 +1,6 @@
 ﻿using Application.Abstraction.ExternalService;
-using Contract.Auth.Request;
-using Contract.Auth.Response;
+using Contract.External.Auth.Response;
+using Contract.External.Auth.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
