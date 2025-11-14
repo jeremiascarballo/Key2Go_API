@@ -76,7 +76,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
 // inyecciones
 #region Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -91,8 +90,20 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+//EXTERNAL SERVICES
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IUsdArsRateService, UsdArsRateService>();
 #endregion
+
+// ESTA línea es opcional, la podés borrar si no la usás
+// builder.Services.AddHttpClient();
+
+builder.Services
+    .AddHttpClient("DolarApi", client =>
+    {
+        client.BaseAddress = new Uri("https://dolarapi.com/v1/");
+    });
 
 var app = builder.Build();
 

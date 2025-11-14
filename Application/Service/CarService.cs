@@ -1,6 +1,7 @@
 ﻿
 
 using Application.Abstraction;
+using Application.Abstraction.ExternalService;
 using Contract.Car.Request;
 using Contract.Car.Response;
 using Domain.Entity;
@@ -13,14 +14,22 @@ namespace Application.Service
     public class CarService : ICarService
     {
         private readonly ICarRepository _carRepository;
-        public CarService(ICarRepository carRepository)
+        private readonly IUsdArsRateService _usdArsRateService;
+        public CarService(ICarRepository carRepository, IUsdArsRateService usdArsRateService)
         {
             _carRepository = carRepository;
+            _usdArsRateService = usdArsRateService;
         }
 
 
         public async Task<List<CarResponse>> GetAll()
         {
+            var rate = await _usdArsRateService.GetUsdArsRateAsync();
+            if (rate == null)
+            {
+                rate=0;
+            }
+
             var response = await _carRepository.GetAllAsync();
             var listCars = response
                 .Select(c => new CarResponse
@@ -31,7 +40,8 @@ namespace Application.Service
                     Model = c.Model,
                     YearOfManufacture = c.YearOfManufacture,
                     Km = c.Km,
-                    DailyPrice = c.DailyPrice,
+                    DailyPriceUsd = c.DailyPriceUsd,
+                    DailyPriceArs = c.DailyPriceUsd * rate.Value,
                     Status = (int)c.Status
                 })
                 .ToList();
@@ -40,6 +50,12 @@ namespace Application.Service
 
         public async Task<CarResponse?> GetById(int id)
         {
+            var rate = await _usdArsRateService.GetUsdArsRateAsync();
+            if (rate == null)
+            {
+                rate = 0;
+            }
+
             var response = await _carRepository.GetByIdAsync(id) is Car car ?
                     new CarResponse()
                     {
@@ -49,7 +65,8 @@ namespace Application.Service
                         Model = car.Model,
                         YearOfManufacture = car.YearOfManufacture,
                         Km = car.Km,
-                        DailyPrice = car.DailyPrice,
+                        DailyPriceUsd = car.DailyPriceUsd,
+                        DailyPriceArs = car.DailyPriceUsd * rate.Value,
                         Status = (int)car.Status
                     } : null;
 
@@ -66,7 +83,7 @@ namespace Application.Service
                 Model = request.Model,
                 YearOfManufacture = request.YearOfManufacture,
                 Km = request.Km,
-                DailyPrice = request.DailyPrice,
+                DailyPriceUsd = request.DailyPriceUsd,
                 Status = (CarStatus)request.Status
             };
 
@@ -80,7 +97,7 @@ namespace Application.Service
                 Model = car.Model,
                 YearOfManufacture = car.YearOfManufacture,
                 Km = car.Km,
-                DailyPrice = car.DailyPrice,
+                DailyPriceUsd = car.DailyPriceUsd,
                 Status = (int)car.Status
             };
         }
@@ -112,7 +129,7 @@ namespace Application.Service
             car.Model = request.Model;
             car.YearOfManufacture = request.YearOfManufacture;
             car.Km = request.Km;
-            car.DailyPrice = request.DailyPrice;
+            car.DailyPriceUsd = request.DailyPriceUsd;
             car.Status = (CarStatus)request.Status;
 
             await _carRepository.UpdateAsync(car);
@@ -125,7 +142,7 @@ namespace Application.Service
                 Model = car.Model,
                 YearOfManufacture = car.YearOfManufacture,
                 Km = car.Km,
-                DailyPrice = car.DailyPrice,
+                DailyPriceUsd = car.DailyPriceUsd,
                 Status = (int)car.Status
             };
         }

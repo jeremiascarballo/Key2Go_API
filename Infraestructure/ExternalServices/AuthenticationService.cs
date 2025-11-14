@@ -1,9 +1,7 @@
 ﻿using Application.Abstraction;
 using Application.Abstraction.ExternalService;
-using Azure.Core;
-using Contract.Auth.Request;
-using Contract.Auth.Response;
-using Domain.Entity;
+using Contract.External.Auth.Response;
+using Contract.External.Auth.Request;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
