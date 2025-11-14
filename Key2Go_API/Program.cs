@@ -96,14 +96,22 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUsdArsRateService, UsdArsRateService>();
 #endregion
 
-// ESTA línea es opcional, la podés borrar si no la usás
-// builder.Services.AddHttpClient();
+PollySettings DolarApi = new()
+{
+    RetryCount = 3,         //cuantas veces va a reintentar
+    RetryAttemptInSec = 5,  //tiempo entre reintentos
+    BreakInSec = 120,       //tiempo que va a estar abierto el circuito
+    HandleEventsAllowed = 3  //cantidad de fallos antes de abrir el circuito
+};
+
 
 builder.Services
     .AddHttpClient("DolarApi", client =>
     {
         client.BaseAddress = new Uri("https://dolarapi.com/v1/");
-    });
+    })
+    .AddPolicyHandler(ResiliencePolicies.GetWaitAndRetryPolicy(DolarApi))
+    .AddPolicyHandler(ResiliencePolicies.GetCircuitBreakerPolicy(DolarApi));
 
 var app = builder.Build();
 
