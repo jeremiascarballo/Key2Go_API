@@ -11,7 +11,7 @@ namespace Application.Service
         Task<PaymentResponse?> GetByTripIdAsync(int tripId);
         Task Create(int tripId, PaymentMethod method);
         Task<PaymentResponse?> Update(int id, PaymentRequest request);
-        Task UpdateForTrip(int tripId, PaymentMethod method);
+        Task UpdateForTrip(int tripId);
         //Task<PaymentResponse?> Create(PaymentRequest request);
         Task<bool> Delete(int id);
     }

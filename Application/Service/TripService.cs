@@ -10,12 +10,14 @@ namespace Application.Service
     {
         private readonly ITripRepository _tripRepository;
         private readonly ICarRepository _carRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IPaymentService _paymentService;
 
-        public TripService(ITripRepository tripRepository, ICarRepository carRepository, IPaymentService paymentService)
+        public TripService(ITripRepository tripRepository, ICarRepository carRepository, IUserRepository userRepository, IPaymentService paymentService)
         {
             _tripRepository = tripRepository;
             _carRepository = carRepository;
+            _userRepository = userRepository;
             _paymentService = paymentService;
         }
 
@@ -65,6 +67,10 @@ namespace Application.Service
             car.Status = CarStatus.Reserved; // ver si modificar la disponibilidad del auto en la creacion o al iniciar el trip
             await _carRepository.UpdateAsync(car);
 
+            var user = await _userRepository.GetByIdAsync(request.UserId);
+            if (user == null)
+                throw new Exception("The user does not exist.");
+
             var trip = new Trip
             {
                 ReservationNumber = request.ReservationNumber,
@@ -75,6 +81,9 @@ namespace Application.Service
                 UserId = request.UserId,
                 CarId = request.CarId
             };
+
+            if (!Enum.IsDefined(typeof(PaymentMethod), request.PaymentMethod))
+                throw new Exception("Payment method not valid.");
 
             trip = await _tripRepository.CreateAsync(trip);
 
@@ -140,7 +149,7 @@ namespace Application.Service
 
             if (tripDurationChanged || carChanged)
             {
-                await _paymentService.UpdateForTrip(trip.Id, (PaymentMethod)request.PaymentMethod);
+                await _paymentService.UpdateForTrip(trip.Id);
             }
 
             return new TripResponse

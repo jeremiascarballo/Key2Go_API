@@ -1,4 +1,5 @@
 ﻿using Application.Abstraction;
+using Application.Abstraction.ExternalService;
 using Contract.Payment.Request;
 using Contract.Payment.Response;
 using Domain.Entity;
@@ -10,24 +11,30 @@ namespace Application.Service
         private readonly IPaymentRepository _paymentRepository;
         private readonly ITripRepository _tripRepository;
         private readonly ICarRepository _carRepository;
+        private readonly IUsdArsRateService _usdArsRateService;
 
-        public PaymentService(IPaymentRepository paymentRepository, ITripRepository tripRepository, ICarRepository carRepository)
+        public PaymentService(IPaymentRepository paymentRepository, ITripRepository tripRepository, ICarRepository carRepository, IUsdArsRateService usdArsRateService)
         {
             _paymentRepository = paymentRepository;
             _tripRepository = tripRepository;
             _carRepository = carRepository;
+            _usdArsRateService = usdArsRateService;
         }
 
         public async Task<List<PaymentResponse>> GetAll()
         {
             var response = await _paymentRepository.GetAllAsync();
+
+            var usdRate = await _usdArsRateService.GetUsdArsRateAsync();
+
             var listPayments = response
                 .Select(p => new PaymentResponse
                 {
                     Id = p.Id,
                     PaymentId = p.PaymentId,
                     PaymentDate = p.PaymentDate,
-                    TotalAmount = p.TotalAmount,
+                    TotalAmountUsd = p.TotalAmount,
+                    TotalAmountArs = usdRate.HasValue ? CalculateArs(p.TotalAmount, usdRate.Value) : 0,
                     Method = (int)p.Method,
                 })
                 .ToList();
@@ -36,13 +43,16 @@ namespace Application.Service
 
         public async Task<PaymentResponse?> GetById(int id)
         {
+            var usdRate = await _usdArsRateService.GetUsdArsRateAsync();
+            
             var response = await _paymentRepository.GetByIdAsync(id) is Payment payment ?
                     new PaymentResponse()
                     {
                         Id = payment.Id,
                         PaymentId = payment.PaymentId,
                         PaymentDate = payment.PaymentDate,
-                        TotalAmount = payment.TotalAmount,
+                        TotalAmountUsd = payment.TotalAmount,
+                        TotalAmountArs = usdRate.HasValue ? CalculateArs(payment.TotalAmount, usdRate.Value) : 0,
                         Method = (int)payment.Method
                     } : null;
 
@@ -51,6 +61,8 @@ namespace Application.Service
 
         public async Task<PaymentResponse?> GetByTripIdAsync(int tripId)
         {
+            var usdRate = await _usdArsRateService.GetUsdArsRateAsync();
+
             var payment = await _paymentRepository.GetByTripIdAsync(tripId);
 
             return payment == null ? null : new PaymentResponse
@@ -58,19 +70,16 @@ namespace Application.Service
                 Id = payment.Id,
                 PaymentId = payment.PaymentId,
                 PaymentDate = payment.PaymentDate,
-                TotalAmount = payment.TotalAmount,
+                TotalAmountUsd = payment.TotalAmount,
+                TotalAmountArs = usdRate.HasValue ? CalculateArs(payment.TotalAmount, usdRate.Value) : 0,
                 Method = (int)payment.Method
             };
         }
 
-        // por que no devuelve <PaymentResponse?> NO DEBERÍA IR EN EL CONTROLLER PORQ NO QUEREMOS Q SE CREE UN PAGO DE LA NADA
         public async Task Create(int tripId, PaymentMethod method)
         {
             var trip = await _tripRepository.GetByIdAsync(tripId)
                 ?? throw new Exception("Trip not found.");
-
-            if (!Enum.IsDefined(typeof(PaymentMethod), method))
-                throw new Exception("Payment method not valid.");
 
             var existingPayment = await _paymentRepository.GetByTripIdAsync(trip.Id);
             if (existingPayment != null)
@@ -94,6 +103,8 @@ namespace Application.Service
 
         public async Task<PaymentResponse?> Update(int id, PaymentRequest request)
         {
+            var usdRate = await _usdArsRateService.GetUsdArsRateAsync();
+
             var payment = await _paymentRepository.GetByIdAsync(id);
 
             if (payment == null)
@@ -110,15 +121,13 @@ namespace Application.Service
                 Id = payment.Id,
                 PaymentId = payment.PaymentId,
                 PaymentDate = payment.PaymentDate,
-                TotalAmount = payment.TotalAmount,
+                TotalAmountUsd = payment.TotalAmount,
+                TotalAmountArs = usdRate.HasValue ? CalculateArs(payment.TotalAmount, usdRate.Value) : 0,
                 Method = (int)payment.Method
             };
         }
 
-        // EL UPDATE SI DEBERÍA IR EN EL CONTROLLER PERO SOLO PARA EDITAR EL METODO DE PAGO? YA QUE EL MONTO DEPENDE DE LOS DÍAS Y EL AUTO
-        // QUE SE ACTUALIZA CUANDO SI SE ACTUALIZA EN LA RESERVA
-        // Serían dos update distintos, uno que actualiza las cosas normales del payment y el metodo de pago y otro que actualiza el monto total por trip
-        public async Task UpdateForTrip(int tripId, PaymentMethod method)
+        public async Task UpdateForTrip(int tripId)
         {
 
             var trip = await _tripRepository.GetByIdAsync(tripId)
@@ -134,31 +143,9 @@ namespace Application.Service
 
             payment.PaymentDate = DateTime.UtcNow;
             payment.TotalAmount = CalculateAmount(trip, car);
-            payment.Method = method;
 
             await _paymentRepository.UpdateAsync(payment);
         }
-
-        //public async Task<PaymentResponse?> Create(PaymentRequest request)
-        //{
-        //    var payment = new Payment
-        //    {
-        //        TotalAmount = request.TotalAmount,
-        //        Method = (PaymentMethod)request.Method,
-        //        TripId = request.TripId
-        //    };
-
-        //    payment = await _paymentRepository.CreateAsync(payment);
-
-        //    return new PaymentResponse
-        //    {
-        //        Id = payment.Id,
-        //        PaymentId = payment.PaymentId,
-        //        PaymentDate = payment.PaymentDate,
-        //        TotalAmount = payment.TotalAmount,
-        //        Method = (int)payment.Method
-        //    };
-        //}
 
         public async Task<bool> Delete(int id)
         {
@@ -184,6 +171,11 @@ namespace Application.Service
             }
 
             return tripDays * car.DailyPriceUsd;
+        }
+
+        private decimal CalculateArs(decimal amountUsd, decimal usdRate)
+        {
+            return amountUsd * usdRate;
         }
     }
 }

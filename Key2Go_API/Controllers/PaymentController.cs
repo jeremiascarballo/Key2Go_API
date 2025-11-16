@@ -1,8 +1,6 @@
 ﻿using Application.Service;
 using Contract.Payment.Request;
 using Contract.Payment.Response;
-using Contract.Trip.Request;
-using Contract.Trip.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -69,24 +67,6 @@ namespace Presentation.Controllers
 
             return Ok(updated);
         }
-
-        //[HttpPost("register-payment")]
-        //public async Task<IActionResult> Create([FromBody] PaymentRequest request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var result = await _paymentService.Create(request);
-
-        //    if (result == null)
-        //    {
-        //        return BadRequest("Could not create payment");
-        //    }
-
-        //    return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        //}
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
