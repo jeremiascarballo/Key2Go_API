@@ -147,7 +147,7 @@ namespace Application.Service
 
             if (tripStatus != 1)
             {
-                return null;
+                throw new Exception("You can only edit pending trips.");
             }
 
             if (request.StartDate > request.EndDate)
