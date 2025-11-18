@@ -41,7 +41,7 @@ namespace Presentation.Controllers
             return Ok(response);
         }
 
-        [HttpPost("register-trip")]
+        [HttpPost]
         public async Task<IActionResult> Create([FromBody] TripRequest request)
         {
             if (!ModelState.IsValid)
