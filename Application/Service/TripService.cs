@@ -1,5 +1,6 @@
 ﻿using Application.Abstraction;
 using Application.Service;
+using Application.Service.Helpers.Validations;
 using Contract.Trip.Request;
 using Contract.Trip.Response;
 using Domain.Entity;
@@ -67,16 +68,31 @@ namespace Application.Service
 
         public async Task<TripResponse?> Create(TripRequest request)
         {
-            if (request.StartDate > request.EndDate)
-                throw new Exception("End date must be equal or greater than start date.");
+            if(!TripValidations.ReservationNumberValidation(request.ReservationNumber))
+            {
+                throw new Exception("Reservation number must be greater than zero.");
+            }
+            if (!TripValidations.StartDateValidation(request.StartDate))
+            {
+                throw new Exception("Start date must be equal or greater than today.");
+            }
 
+            if (!TripValidations.EndDateValidation(request.StartDate, request.EndDate))
+            {
+                throw new Exception("End date must be equal or greater than start date.");
+            }
+                
             var user = await _userRepository.GetByIdAsync(request.UserId);
             if (user == null)
+            {
                 throw new Exception("The user does not exist.");
+            }
 
             var car = await _carRepository.GetByIdAsync(request.CarId);
             if (car == null)
+            {
                 throw new Exception("The car does not exist.");
+            }
 
             bool isAvailable = await _carService.IsCarAvailable(
                 request.CarId,
@@ -150,16 +166,31 @@ namespace Application.Service
                 throw new Exception("You can only edit pending trips.");
             }
 
-            if (request.StartDate > request.EndDate)
+            if (!TripValidations.ReservationNumberValidation(request.ReservationNumber))
+            {
+                throw new Exception("Reservation number must be greater than zero.");
+            }
+            if (!TripValidations.StartDateValidation(request.StartDate))
+            {
+                throw new Exception("Start date must be equal or greater than today.");
+            }
+
+            if (!TripValidations.EndDateValidation(request.StartDate, request.EndDate))
+            {
                 throw new Exception("End date must be equal or greater than start date.");
+            }
 
             var user = await _userRepository.GetByIdAsync(request.UserId);
             if (user == null)
+            {
                 throw new Exception("The user does not exist.");
+            }
 
             var car = await _carRepository.GetByIdAsync(request.CarId);
             if (car == null)
+            {
                 throw new Exception("The car does not exist.");
+            }
 
             bool datesChanged =
                 trip.StartDate != request.StartDate ||
@@ -258,6 +289,11 @@ namespace Application.Service
             if (trip == null)
             {
                 return false;
+            }
+
+            if (!TripValidations.FinalKmValidation(trip.InitialKm, finalKm))
+            {
+                throw new Exception("Final KM must be greater than Initial KM.");
             }
 
             trip.FinalKm = finalKm;
