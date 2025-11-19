@@ -106,10 +106,20 @@ namespace Application.Service
             var usdRate = await _usdArsRateService.GetUsdArsRateAsync();
 
             var payment = await _paymentRepository.GetByIdAsync(id);
-
             if (payment == null)
             {
                 return null;
+            }
+
+            var trip = await _tripRepository.GetByIdAsync(payment.TripId);
+            if (trip == null)
+            {
+                throw new Exception("The trip associated with this payment does not exist.");
+            }
+
+            if (trip.Status != TripStatus.Pending)
+            {
+                throw new Exception("Payments can only be edited when the trip is in Pending status.");
             }
 
             payment.Method = (PaymentMethod)request.Method;

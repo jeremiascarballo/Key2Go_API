@@ -35,10 +35,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy(nameof(RoleType.User), policy => policy.RequireRole(nameof(RoleType.User)));
-    options.AddPolicy(nameof(RoleType.Admin), policy => policy.RequireRole(nameof(RoleType.Admin)));
+    // Cualquier usuario logueado con rol User, Admin o SuperAdmin
+    options.AddPolicy(nameof(RoleType.User), policy => policy.RequireRole(nameof(RoleType.User), nameof(RoleType.Admin), nameof(RoleType.SuperAdmin)));
+
+    // Admin y SuperAdmin (pero NO User)
+    options.AddPolicy(nameof(RoleType.Admin), policy => policy.RequireRole(nameof(RoleType.Admin), nameof(RoleType.SuperAdmin)));
+
+    // Solo superadmin
     options.AddPolicy(nameof(RoleType.SuperAdmin), policy => policy.RequireRole(nameof(RoleType.SuperAdmin)));
 });
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

@@ -30,6 +30,7 @@ namespace Presentation.Controllers
             }
             return Ok(response);
         }
+
         [HttpGet("{id:int}")]
         public async Task<ActionResult> GetById([FromRoute] int id)
         {
@@ -40,8 +41,9 @@ namespace Presentation.Controllers
             }
             return Ok(response);
         }
+
         [HttpPost]
-        //[Authorize(Policy = nameof(RoleType.Admin))]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Create([FromBody] CarRequest request)
         {
             if (!ModelState.IsValid)
@@ -54,7 +56,9 @@ namespace Presentation.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
+
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _carService.Delete(id);
@@ -64,7 +68,9 @@ namespace Presentation.Controllers
             }
             return NoContent();
         }
+
         [HttpPut("{id:int}")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] CarRequest request)
         {
             if (!ModelState.IsValid)
