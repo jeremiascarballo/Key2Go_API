@@ -4,7 +4,9 @@ using Contract.Trip.Response;
 using Domain.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Security.Claims;
+
+//ver si agregamos otro controlador para la creacion de trips ADMIN
 
 namespace Presentation.Controllers
 {
@@ -17,6 +19,38 @@ namespace Presentation.Controllers
         public TripController(ITripService tripService)
         {
             _tripService = tripService;
+        }
+
+        [HttpGet("my")]
+        [Authorize(Policy = nameof(RoleType.User))]
+        public async Task<ActionResult<List<TripResponse>>> GetMyTrips()
+        {
+            var currentUserId = GetCurrentUserId();
+
+            var response = await _tripService.GetAllByUserId(currentUserId);
+
+            if (!response.Any())
+            {
+                return NotFound("No trips found for current user");
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet("my/{id}")]
+        [Authorize(Policy = nameof(RoleType.User))]
+        public async Task<ActionResult<TripResponse>> GetMyTripbyId([FromRoute] int tripId)
+        {
+            var currentUserId = GetCurrentUserId();
+
+            var response = await _tripService.GetByUserId(tripId, currentUserId);
+
+            if (response == null)
+            {
+                return NotFound("Trip not found for current user");
+            }
+
+            return Ok(response);
         }
 
 
@@ -50,10 +84,12 @@ namespace Presentation.Controllers
         [Authorize(Policy = nameof(RoleType.User))]
         public async Task<IActionResult> Create([FromBody] TripRequest request)
         {
+            var currentUserId = GetCurrentUserId();
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _tripService.Create(request);
+            var result = await _tripService.Create(currentUserId, request);
 
             if (result == null)
                 return BadRequest("Could not create trip");
@@ -176,5 +212,17 @@ namespace Presentation.Controllers
             }
             return Ok(response);
         }
+
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new Exception("User id not found in token");
+
+            return int.Parse(userIdClaim);
+        }
+
     }
 }
