@@ -1,6 +1,8 @@
 ﻿using Application.Service;
 using Contract.Payment.Request;
 using Contract.Payment.Response;
+using Domain.Entity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -17,6 +19,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<ActionResult<List<PaymentResponse>>> GetAll()
         {
             var response = await _paymentService.GetAll();
@@ -29,6 +32,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<ActionResult<PaymentResponse>> GetById([FromRoute] int id)
         {
             var response = await _paymentService.GetById(id);
@@ -42,6 +46,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("by-trip/{tripId:int}")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<ActionResult<PaymentResponse>> GetByTripId([FromRoute] int tripId)
         {
             var response = await _paymentService.GetByTripIdAsync(tripId);
@@ -53,6 +58,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Policy = nameof(RoleType.User))]
         public async Task<IActionResult> Update(int id, [FromBody] PaymentRequest request)
         {
             if (!ModelState.IsValid)
@@ -69,6 +75,7 @@ namespace Presentation.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _paymentService.Delete(id);

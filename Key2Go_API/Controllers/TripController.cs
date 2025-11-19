@@ -1,6 +1,8 @@
 ﻿using Application.Service;
 using Contract.Trip.Request;
 using Contract.Trip.Response;
+using Domain.Entity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -17,7 +19,9 @@ namespace Presentation.Controllers
             _tripService = tripService;
         }
 
-        [HttpGet] 
+
+        [HttpGet]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<ActionResult<List<TripResponse>>> GetAll()
         {
             var response = await _tripService.GetAll();
@@ -30,6 +34,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<ActionResult<TripResponse>> GetById([FromRoute] int id)
         {
             var response = await _tripService.GetById(id);
@@ -42,6 +47,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = nameof(RoleType.User))]
         public async Task<IActionResult> Create([FromBody] TripRequest request)
         {
             if (!ModelState.IsValid)
@@ -56,6 +62,7 @@ namespace Presentation.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _tripService.Delete(id);
@@ -66,6 +73,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Policy = nameof(RoleType.User))]
         public async Task<IActionResult> Update(int id, [FromBody] TripUpdate request)
         {
             if (!ModelState.IsValid)
@@ -81,6 +89,7 @@ namespace Presentation.Controllers
 
 
         [HttpPut("{id}/cancel")]
+        [Authorize(Policy = nameof(RoleType.User))]
         public async Task<IActionResult> CancelTrip(int id)
         {
             var updated = await _tripService.CancelTrip(id);
@@ -92,6 +101,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{id}/start")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Start(int id)
 
         {
@@ -103,8 +113,8 @@ namespace Presentation.Controllers
             return Ok("Viaje iniciado");
         }
 
-
         [HttpPut("{id}/finish")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Finish(int id, [FromBody] int finalKm)
         {
             var updated = await _tripService.FinishTrip(id, finalKm);
@@ -116,6 +126,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("AllPendingTrip")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<ActionResult<TripResponse>> GetAllPending()
         {
             var response = await _tripService.GetByStatus(1);
@@ -128,6 +139,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("AllActiveTrip")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<ActionResult<TripResponse>> GetAllActive()
         {
             var response = await _tripService.GetByStatus(2);
@@ -140,6 +152,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("AllCancelledTrip")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<ActionResult<TripResponse>> GetAllCancelled()
         {
             var response = await _tripService.GetByStatus(3);
@@ -152,6 +165,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("AllFinishedTrip")]
+        [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<ActionResult<TripResponse>> GetAllFinished()
         {
             var response = await _tripService.GetByStatus(4);
