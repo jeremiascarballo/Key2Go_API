@@ -75,9 +75,16 @@ namespace Application.Service
 
         public async Task<CarResponse?> Create(CarRequest request)
         {
+            var existingLicensePlate = await _carRepository.GetByLicensePlate(request.LicensePlate);
+
+            if (existingLicensePlate != null)
+            {
+                throw new Exception($"Car with license plate {request.LicensePlate} already exists");
+            }
+
             if (!(CarValidations.LicensePlateValidation(request.LicensePlate)))
             {
-                throw new Exception("invalid License Plate format");
+                throw new Exception("invalid license plate format");
             } 
             if(!(CarValidations.YearOfManufactureValidation(request.YearOfManufacture)))
             {

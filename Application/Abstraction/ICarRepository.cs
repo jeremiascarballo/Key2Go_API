@@ -5,6 +5,6 @@ namespace Application.Abstraction
 {
     public interface ICarRepository : IBaseRepository<Car>
     {
-
+        Task<Car?> GetByLicensePlate(string licensePlate);
     }
 }
