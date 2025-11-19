@@ -40,7 +40,7 @@ namespace Presentation.Controllers
             }
             return Ok(response);
         }
-        [HttpPost("register-car")]
+        [HttpPost]
         //[Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Create([FromBody] CarRequest request)
         {

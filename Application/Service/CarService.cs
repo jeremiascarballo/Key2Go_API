@@ -1,5 +1,6 @@
 ﻿using Application.Abstraction;
 using Application.Abstraction.ExternalService;
+using Application.Service.Helpers.Validations;
 using Contract.Car.Request;
 using Contract.Car.Response;
 using Domain.Entity;
@@ -74,7 +75,37 @@ namespace Application.Service
 
         public async Task<CarResponse?> Create(CarRequest request)
         {
-            var car = new Car             {
+            var existingLicensePlate = await _carRepository.GetByLicensePlate(request.LicensePlate);
+
+            if (existingLicensePlate != null)
+            {
+                throw new Exception($"Car with license plate {request.LicensePlate} already exists");
+            }
+
+            if (!(CarValidations.LicensePlateValidation(request.LicensePlate)))
+            {
+                throw new Exception("invalid license plate format");
+            } 
+            if(!(CarValidations.YearOfManufactureValidation(request.YearOfManufacture)))
+            {
+                var currentYear= DateTime.UtcNow.Year;
+                throw new Exception($"Year of manufacture must be between 1900 and {currentYear}");
+            }
+            if (!(CarValidations.KmValidation(request.Km)))
+            {
+                throw new Exception("Car Km cannot be less than 0");
+            }
+            if(!(CarValidations.DailyPriceValidation(request.DailyPriceUsd)))
+            {
+                throw new Exception("Price must be greater than 0");
+            }
+            if(!(CarValidations.StatusValidation(request.Status)))
+            {
+                throw new Exception("Status can only be 1 or 2");
+            }
+
+            var car = new Car             
+            {
                 LicensePlate = request.LicensePlate,
                 Brand = request.Brand,
                 Model = request.Model,
@@ -119,6 +150,28 @@ namespace Application.Service
             if (car == null)
             {
                 return null;
+            }
+
+            if (!(CarValidations.LicensePlateValidation(request.LicensePlate)))
+            {
+                throw new Exception("invalid License Plate format");
+            }
+            if (!(CarValidations.YearOfManufactureValidation(request.YearOfManufacture)))
+            {
+                var currentYear = DateTime.UtcNow.Year;
+                throw new Exception($"Year of manufacture must be between 1900 and {currentYear}");
+            }
+            if (!(CarValidations.KmValidation(request.Km)))
+            {
+                throw new Exception("Car Km cannot be less than 0");
+            }
+            if (!(CarValidations.DailyPriceValidation(request.DailyPriceUsd)))
+            {
+                throw new Exception("Price must be greater than 0");
+            }
+            if (!(CarValidations.StatusValidation(request.Status)))
+            {
+                throw new Exception("Status can only be 1 or 2");
             }
 
             car.LicensePlate = request.LicensePlate;

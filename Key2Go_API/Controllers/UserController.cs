@@ -40,7 +40,7 @@ namespace Presentation.Controllers
             return Ok(response);
         }
 
-        [HttpPost("register")]
+        [HttpPost]
         public async Task<IActionResult> Create([FromBody] UserRequest request)
         {
             if (!ModelState.IsValid)
