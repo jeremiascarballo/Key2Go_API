@@ -127,9 +127,9 @@ namespace Application.Service
             }
 
             var user = await _userRepository.GetByIdAsync(request.UserId);
-            if (user == null)
+            if (user == null || !user.IsActive)
             {
-                throw new Exception("The user does not exist.");
+                throw new Exception("The selected user is inactive or does not exist");
             }
 
             var car = await _carRepository.GetByIdAsync(request.CarId);
@@ -197,9 +197,9 @@ namespace Application.Service
             }
                 
             var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
+            if (user == null || !user.IsActive)
             {
-                throw new Exception("The user does not exist.");
+                throw new Exception("The selected user is inactive or does not exist");
             }
 
             var car = await _carRepository.GetByIdAsync(request.CarId);
@@ -295,9 +295,9 @@ namespace Application.Service
             }
 
             var user = await _userRepository.GetByIdAsync(request.UserId);
-            if (user == null)
+            if (user == null || !user.IsActive)
             {
-                throw new Exception("The user does not exist.");
+                throw new Exception("The selected user is inactive or does not exist");
             }
 
             var car = await _carRepository.GetByIdAsync(request.CarId);
@@ -362,9 +362,9 @@ namespace Application.Service
             }
 
             var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
+            if (user == null || !user.IsActive)
             {
-                throw new Exception("The user does not exist.");
+                throw new Exception("The selected user is inactive or does not exist");
             }
 
             var tripStatus = (int)trip.Status;
