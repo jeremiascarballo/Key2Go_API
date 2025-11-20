@@ -1,7 +1,6 @@
 ﻿using Application.Abstraction.ExternalService;
 using Contract.External.Auth.Request;
 using Contract.External.Auth.Response;
-using Contract.User.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,15 +34,22 @@ namespace Api.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var result = await _authenticationService.Register(request);
+                var result = await _authenticationService.Register(request);
 
-            if (result == null)
-                return BadRequest("Email already in use");
+                if (result == null)
+                    return BadRequest("Email already in use");
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

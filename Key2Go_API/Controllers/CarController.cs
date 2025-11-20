@@ -10,7 +10,7 @@ namespace Presentation.Controllers
 {
     [Route("api/[Controller]")]
     [ApiController]
-    
+
     public class CarController : ControllerBase
     {
         private readonly ICarService _carService;
@@ -48,15 +48,22 @@ namespace Presentation.Controllers
         [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Create([FromBody] CarRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var result = await _carService.Create(request);
+                var result = await _carService.Create(request);
 
-            if (result == null)
-                return BadRequest("Could not create car");
+                if (result == null)
+                    return BadRequest("Could not create car");
 
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id:int}")]
@@ -75,15 +82,22 @@ namespace Presentation.Controllers
         [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] CarRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var result = await _carService.Update(id, request);
+                var result = await _carService.Update(id, request);
 
-            if (result == null)
-                return NotFound("Car not found");
+                if (result == null)
+                    return NotFound("Car not found");
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
