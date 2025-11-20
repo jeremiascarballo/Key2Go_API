@@ -5,9 +5,12 @@ namespace Application.Service
 {
     public interface ITripService
     {
+        Task<List<TripResponse>> GetAllByUserId(int userId);
+        Task<TripResponse> GetByUserId(int tripId, int userId);
+
         Task<List<TripResponse>> GetAll();
         Task<TripResponse?> GetById(int id);
-        Task<TripResponse?> Create(TripRequest request);
+        Task<TripResponse?> Create(int userId, TripRequest request);
         Task<bool> Delete(int id);
         Task<TripResponse?> Update(int id, TripUpdate request);
 

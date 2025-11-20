@@ -1,10 +1,8 @@
 ﻿using Application.Abstraction;
-using Application.Service;
 using Application.Service.Helpers.Validations;
 using Contract.Trip.Request;
 using Contract.Trip.Response;
 using Domain.Entity;
-using System.Net.NetworkInformation;
 
 namespace Application.Service
 {
@@ -24,6 +22,52 @@ namespace Application.Service
             _carService = carService;
             _paymentService = paymentService;
         }
+
+        public async Task<List<TripResponse>> GetAllByUserId(int userId)
+        {
+            var response = await _tripRepository.GetByUserIdAsync(userId);
+            var listTrips = response
+                .Select(trip => new TripResponse
+                {
+                    Id = trip.Id,
+                    ReservationNumber = trip.ReservationNumber,
+                    CreationDate = trip.CreationDate,
+                    StartDate = trip.StartDate,
+                    EndDate = trip.EndDate,
+                    InitialKm = trip.InitialKm,
+                    FinalKm = trip.FinalKm,
+                    Status = (int)trip.Status,
+                    UserId = trip.UserId,
+                    CarId = trip.CarId
+                })
+                .ToList();
+            return listTrips;
+        }
+
+        public async Task<TripResponse> GetByUserId(int tripId, int userId)
+        {
+            var trip = await _tripRepository.GetByIdAsync(tripId);
+            if (trip == null || trip.UserId != userId)
+            {
+                return null;
+            }
+
+            return new TripResponse
+            {
+                Id = trip.Id,
+                ReservationNumber = trip.ReservationNumber,
+                CreationDate = trip.CreationDate,
+                StartDate = trip.StartDate,
+                EndDate = trip.EndDate,
+                InitialKm = trip.InitialKm,
+                FinalKm = trip.FinalKm,
+                Status = (int)trip.Status,
+                UserId = trip.UserId,
+                CarId = trip.CarId
+            };
+        }
+
+
 
         public async Task<List<TripResponse>> GetAll()
         {
@@ -66,7 +110,7 @@ namespace Application.Service
             return response;
         }
 
-        public async Task<TripResponse?> Create(TripRequest request)
+        public async Task<TripResponse?> Create(int userId, TripRequest request)
         {
             if(!TripValidations.ReservationNumberValidation(request.ReservationNumber))
             {
@@ -82,7 +126,7 @@ namespace Application.Service
                 throw new Exception("End date must be equal or greater than start date.");
             }
                 
-            var user = await _userRepository.GetByIdAsync(request.UserId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 throw new Exception("The user does not exist.");
@@ -110,7 +154,7 @@ namespace Application.Service
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 Status = TripStatus.Pending,
-                UserId = request.UserId,
+                UserId = userId,
                 CarId = request.CarId
             };
 

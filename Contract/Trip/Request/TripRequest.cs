@@ -8,7 +8,6 @@
         public int PaymentMethod { get; set; }
 
         // FK
-        public int UserId { get; set; }
         public int CarId { get; set; }
     }
 }
