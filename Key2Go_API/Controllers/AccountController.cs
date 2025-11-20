@@ -36,23 +36,37 @@ namespace Presentation.Controllers
         [HttpPut("update-profile")]
         public async Task<IActionResult> UpdateProfile(UpdateProfileRequest request)
         {
-            var userId = GetCurrentUserId();
+            try
+            {
+                var userId = GetCurrentUserId();
 
-            var updated = await _accountService.UpdateProfileAsync(userId, request);
-            if (!updated) return BadRequest("No se pudo actualizar el perfil.");
+                var updated = await _accountService.UpdateProfileAsync(userId, request);
+                if (!updated) return BadRequest("No se pudo actualizar el perfil.");
 
-            return Ok("Se actualizo el perfil");
+                return Ok("Se actualizo el perfil");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
         {
-            var userId = GetCurrentUserId();
+            try
+            {
+                var userId = GetCurrentUserId();
 
-            var changed = await _accountService.ChangePasswordAsync(userId, request);
-            if (!changed) return BadRequest("Contraseña actual incorrecta.");
+                var changed = await _accountService.ChangePasswordAsync(userId, request);
+                if (!changed) return BadRequest("Contraseña actual incorrecta.");
 
-            return Ok("Se actualizo la contraseña");
+                return Ok("Se actualizo la contraseña");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 

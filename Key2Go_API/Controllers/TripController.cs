@@ -82,32 +82,46 @@ namespace Presentation.Controllers
         [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> AdminCreate([FromBody] AdminTripRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var result = await _tripService.AdminCreate(request);
+                var result = await _tripService.AdminCreate(request);
 
-            if (result == null)
-                return BadRequest("Could not create trip");
+                if (result == null)
+                    return BadRequest("Could not create trip");
 
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("reserve")]
         [Authorize(Policy = nameof(RoleType.User))]
         public async Task<IActionResult> Create([FromBody] TripRequest request)
         {
-            var currentUserId = GetCurrentUserId();
+            try
+            {
+                var currentUserId = GetCurrentUserId();
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var result = await _tripService.Create(currentUserId, request);
+                var result = await _tripService.Create(currentUserId, request);
 
-            if (result == null)
-                return BadRequest("Could not create trip");
+                if (result == null)
+                    return BadRequest("Could not create trip");
 
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id:int}")]
@@ -125,32 +139,46 @@ namespace Presentation.Controllers
         [Authorize(Policy = nameof(RoleType.Admin))]
         public async Task<IActionResult> AdminUpdate(int id, [FromBody] AdminTripUpdate request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var updated = await _tripService.AdminUpdate(id, request);
+                var updated = await _tripService.AdminUpdate(id, request);
 
-            if (updated is null)
-                return NotFound("Trip not found");
+                if (updated is null)
+                    return NotFound("Trip not found");
 
-            return Ok(updated);
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("modify/{id:int}")]
         [Authorize(Policy = nameof(RoleType.User))]
-        public async Task<IActionResult> Update(int id, [FromBody]TripUpdate request)
+        public async Task<IActionResult> Update(int id, [FromBody] TripUpdate request)
         {
-            var currentUserId = GetCurrentUserId();
-            
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                var currentUserId = GetCurrentUserId();
 
-            var updated = await _tripService.Update(id, currentUserId, request);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            if (updated is null)
-                return NotFound("Trip not found");
+                var updated = await _tripService.Update(id, currentUserId, request);
 
-            return Ok(updated);
+                if (updated is null)
+                    return NotFound("Trip not found");
+
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}/cancel")]
