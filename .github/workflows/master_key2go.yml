@@ -69,7 +69,7 @@ jobs:
       - name: Update database with EF Core migrations
         run: dotnet ef database update --project ./Key2Go_API/Presentation.csproj --startup-project ./Key2Go_API/Presentation.csproj
         env:
-          ASPNETCORE_ENVIRONMENT: Development
+          ASPNETCORE_ENVIRONMENT: Production
           
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -80,6 +80,7 @@ jobs:
           package: .
 
           
+
 
 
 
