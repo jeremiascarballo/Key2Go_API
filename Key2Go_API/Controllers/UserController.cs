@@ -52,15 +52,22 @@ namespace Presentation.Controllers
         [Authorize(Policy = nameof(RoleType.SuperAdmin))]
         public async Task<IActionResult> Create([FromBody] UserRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var result = await _userService.Create(request);
+                var result = await _userService.Create(request);
 
-            if (result == null)
-                return BadRequest("Email already in use");
+                if (result == null)
+                    return BadRequest("Email already in use");
 
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
@@ -78,15 +85,22 @@ namespace Presentation.Controllers
         [Authorize(Policy = nameof(RoleType.SuperAdmin))]
         public async Task<IActionResult> Update(int id, [FromBody] UserRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var updated = await _userService.Update(id, request);
+                var updated = await _userService.Update(id, request);
 
-            if (updated is null)
-                return NotFound("User not found");
+                if (updated is null)
+                    return NotFound("User not found");
 
-            return Ok(updated);
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
